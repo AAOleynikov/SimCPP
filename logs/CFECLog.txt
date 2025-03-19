@@ -1,0 +1,62 @@
+==--+
+2024-1-20 3:25:24	
+"three grhoups of workers" Sim model CEC and FEC logging enabled
+Transact tuple {ID; time next event; current state; next state}
+==--+
+2024-1-20 3:25:24	"init generation" Xact:1 model time: 0.000000
+FEC:   {1; 6.000000; 0; 1} 
+CEC:   
+
+2024-1-20 3:25:24	"init generation" Xact:2 model time: 0.000000
+FEC:   {1; 6.000000; 0; 1} {2; 300.000000; 0; 7} 
+CEC:   
+
+2024-1-20 3:25:24	"promotion of model time" Xact:1 model time: 6.000000
+FEC:   {2; 300.000000; 0; 7} 
+CEC:   {1; 6.000000; 0; 1} 
+
+2024-1-20 3:25:24	"seizing" Xact:1 model time: 6.000000
+FEC:   {2; 300.000000; 0; 7} 
+CEC:   {1; 6.000000; 1; 1} 
+
+2024-1-20 3:25:24	"advance" Xact:1 model time: 6.000000
+FEC:   {1; 35.995004; 1; 2} {2; 300.000000; 0; 7} 
+CEC:   
+
+2024-1-20 3:25:24	"promotion of model time" Xact:1 model time: 35.995004
+FEC:   {2; 300.000000; 0; 7} 
+CEC:   {1; 35.995004; 1; 2} 
+
+2024-1-20 3:25:24	"releazing" Xact:1 model time: 35.995004
+FEC:   {2; 300.000000; 0; 7} 
+CEC:   {1; 35.995004; 2; 2} 
+
+2024-1-20 3:25:24	"seizing" Xact:1 model time: 35.995004
+FEC:   {2; 300.000000; 0; 7} 
+CEC:   {1; 35.995004; 4; 4} 
+
+2024-1-20 3:25:24	"advance" Xact:1 model time: 35.995004
+FEC:   {1; 40.424140; 4; 5} {2; 300.000000; 0; 7} 
+CEC:   
+
+2024-1-20 3:25:24	"promotion of model time" Xact:1 model time: 40.424140
+FEC:   {2; 300.000000; 0; 7} 
+CEC:   {1; 40.424140; 4; 5} 
+
+2024-1-20 3:25:24	"releazing" Xact:1 model time: 40.424140
+FEC:   {2; 300.000000; 0; 7} 
+CEC:   {1; 40.424140; 5; 5} 
+
+2024-1-20 3:25:24	"terminating" Xact:1 model time: 40.424140
+FEC:   {2; 300.000000; 0; 7} 
+CEC:   
+
+2024-1-20 3:25:24	"promotion of model time" Xact:2 model time: 300.000000
+FEC:   
+CEC:   {2; 300.000000; 0; 7} 
+
+==--+
+2024-1-20 3:25:24	
+Sim model CEC and FEC logging disabled
+Simulation is ended!
+==--+

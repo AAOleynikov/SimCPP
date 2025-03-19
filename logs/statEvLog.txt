@@ -1,0 +1,18 @@
+==--+
+2024-1-20 3:25:24	
+"three grhoups of workers" Sim model statistics logging enabled
+==--+
+2024-1-20 3:25:24	
+QUEUE		MAX	CONT.	ENTRY	ENTRY(0)	AVE.CONT.	AVE.TIME	AVE.(-0)
+W1_QUEUE	1	0	1	1		0.000000	0.000000	------
+W2_QUEUE	1	0	1	1		0.000000	0.000000	------
+
+STORAGE		CAP.	MIN.	MAX.	ENTRIES		AVE.C.		UTIL.
+workers_1	1	1	1	1		0.099983	0.099983
+workers_2	2	2	1	1		0.014764	0.007382
+workers_3	3	3	0	0		0.000000	0.000000
+==--+
+2024-1-20 3:25:24	
+Sim model system events logging disabled
+Simulation is ended!
+==--+
