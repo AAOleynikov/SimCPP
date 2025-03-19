@@ -1,6 +1,6 @@
 #pragma once
 
-#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Transact.h>
+#include "Transact.h"
 #include <string>
 #include <algorithm>
 #include <stdexcept>

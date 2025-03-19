@@ -1,6 +1,5 @@
 #include <fstream>
-#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\SimCPP.h>
-
+#include "SimCPP.h"
 
 #define METKA1 5
 #define METKA2 8

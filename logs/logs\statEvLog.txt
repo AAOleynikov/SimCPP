@@ -1,0 +1,18 @@
+==--+
+2025-3-20 1:6:8	
+"three grhoups of workers" Sim model statistics logging enabled
+==--+
+2025-3-20 1:6:9	
+QUEUE		MAX	CONT.	ENTRY	ENTRY(0)	AVE.CONT.	AVE.TIME	AVE.(-0)
+W1_QUEUE	16	9	613	132		3.897392	22.888435	29.169669
+W2_QUEUE	19	6	598	153		3.810739	22.940904	30.828451
+
+STORAGE		CAP.	MIN.	MAX.	ENTRIES		AVE.C.		UTIL.
+workers_1	3	0	3	430		2.768114	0.922705
+workers_2	3	0	3	403		2.658643	0.886214
+workers_3	3	0	3	363		2.734833	0.911611
+==--+
+2025-3-20 1:6:9	
+Sim model system events logging disabled
+Simulation is ended!
+==--+

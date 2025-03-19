@@ -1,0 +1,13 @@
+==--+
+2025-3-20 1:6:8	
+"three grhoups of workers" Sim model system events logging enabled
+Sim model statistics logging enabled
+Sim model transacts logging enabled
+Sim model CEC and FEC logging enabled
+Transact tuple {ID; time next event; current state; next state; is blocked}
+==--+
+==--+
+2025-3-20 1:6:9	
+Sim model statistics logging disabled
+Simulation is ended!
+==--+
