@@ -10,11 +10,12 @@
 #include <algorithm> //string.replace
 #include <functional> //[](){} - lambda func
 
-#include "Transact.h"
-#include "EventChain.h"
-#include "Storages.h"
-#include "SimLogs.h"
-#include "Queues.h"
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Transact.h>
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\EventChain.h>
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Storages.h>
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\SimLogs.h>
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Queues.h>
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Links.h>
 
 class SimCPP {
     private:
@@ -22,19 +23,19 @@ class SimCPP {
         unsigned long _maxId;   //current max ID of Transact
         long double _modelTime; //current model time
         unsigned int _counter;  //analog GPSS START directive argument (START _counter)
-        unsigned int _R1, _RGB1, _RGB2, _RGB3G1, _RGB3B1;
 
         EventChain _FEC; //feature event chain
         EventChain _CEC; //current event chain
         EventChain::iterator _CECIt;
-
+        Links _links;
         SimLogs* _simLogs;
         Storages _storages;
         Queues _queues;
+
+        //void SimCPPEnd();
     public:
-        SimCPP (std::string modelName, unsigned int R1, unsigned int RGB1, unsigned int RGB2, unsigned int RGB3G1, unsigned int RGB3B1): \
-            _modelName(modelName), _maxId(1), _modelTime(.0), _counter(0), _R1(R1), _RGB1(RGB1), _RGB2(RGB2), _RGB3G1(RGB3G1), _RGB3B1(RGB3B1),
-            _FEC("FEC"), _CEC("CEC"), _simLogs(nullptr) { _CECIt = _CEC.begin(); }
+        SimCPP (std::string modelName): _modelName(modelName), _maxId(1), _modelTime(.0), _counter(0), \
+             _FEC("FEC"), _CEC("CEC"), _simLogs(nullptr) { _CECIt = _CEC.begin(); }
 
         ~SimCPP() {if (_simLogs != nullptr) {delete _simLogs;};};
 
@@ -48,87 +49,31 @@ class SimCPP {
         void initGenerate(unsigned int birthState, long double birthTime);
         void generate(long double birthDelayInterval);
         void terminate(unsigned int reduceCounter = 0);
+        void assign(const std::string paramName, const long double value);
+        void test(const bool switchRoute, const unsigned int ifFalseState);
 
         void queue(const std::string queueName);
         void depart(const std::string queueName);
 
         void advance(long double delay);
-        unsigned int enter(const std::string name, const unsigned int numbOfChannels = 1);
+        void enter(const std::string name, const unsigned int numbOfChannels = 1);
         void leave(const std::string name, const unsigned int numbOfChannels = 1);
+        void transfer(const unsigned int nextState);
+        void link(const std::string linkName, const std::string discipline);
+        void unlink(const std::string linkName, const unsigned int nextState, const unsigned int numbReleasedTrans);
+        unsigned int getStorageParam(const std::string storageName, const std::string SNA);
+        unsigned int getLinkParam(const std::string linkName, const std::string SNA);
         double exponential(double mean);
-        
-        void stage1 ();
-        void stage2 ();
-        void stage3 ();
-        void stage4 ();
-        void stage5 ();
-        void stage6 ();
 };
 
 //-----
 
-void SimCPP::stage1() {
-    this->queue("W1_QUEUE");
-
-    if (_storages.getStorageParam("workers_1","R") == 0 && _storages.getStorageParam("workers_3","R") != 0 && \
-        _queues.getQueueParam("W1_QUEUE", "Q") >= _queues.getQueueParam("W2_QUEUE", "Q")) {
-            (*_CECIt)->setNextState(3);
-            this->enter("workers_3");
-            this->depart("W1_QUEUE");
-            this->advance(this->exponential(_RGB3G1));
+unsigned int SimCPP::getLinkParam(const std::string linkName, const std::string SNA) {
+        if (!this->isRunning()) {
+        throw std::logic_error("You cannot interact with the model until you initialize it with \"start\"");
     }
-    else if (_storages.getStorageParam("workers_1","R") != 0) {
-        this->enter("workers_1");
-        (*_CECIt)->setNextState(2);
-        this->depart("W1_QUEUE");
-        this->advance(this->exponential(_RGB1));
-    }
-    else {
-        _CECIt++;
-    }
+    return _links.getLinkParam(linkName, SNA);
 }
-
-void SimCPP::stage2() {
-    this->leave("workers_1");
-    (*_CECIt)->setNextState(4);
-}
-
-void SimCPP::stage3() {
-    this->leave("workers_3");
-    (*_CECIt)->setNextState(4); 
-}
-
-void SimCPP::stage4() {
-    this->queue("W2_QUEUE");
-
-    if (_storages.getStorageParam("workers_2","R") == 0 && _storages.getStorageParam("workers_3","R") != 0 && \
-        _queues.getQueueParam("W2_QUEUE", "Q") >= _queues.getQueueParam("W1_QUEUE", "Q")) {
-            (*_CECIt)->setNextState(6);
-            this->enter("workers_3");
-            this->depart("W2_QUEUE");
-            this->advance(this->exponential(_RGB3B1));
-    }
-    else if (_storages.getStorageParam("workers_2","R") != 0) {
-        this->enter("workers_2");
-        (*_CECIt)->setNextState(5);
-        this->depart("W2_QUEUE");
-        this->advance(this->exponential(_RGB2));
-    }
-    else {
-        _CECIt++;
-    }
-}
-
-void SimCPP::stage5 () {
-    this->leave("workers_2");
-    this->terminate();
-}
-
-void SimCPP::stage6 () {
-    this->leave("workers_3");
-    this->terminate();
-}
-
 
 void SimCPP::queue(const std::string queueName) {
     Transact* currTransact;
@@ -139,6 +84,7 @@ void SimCPP::queue(const std::string queueName) {
 
     currTransact = *_CECIt;
     _queues.queue(queueName, currTransact);
+    (currTransact)->setNextState((currTransact)->getCurrentState()+1);
 }
 
 void SimCPP::depart(const std::string queueName) {
@@ -150,6 +96,67 @@ void SimCPP::depart(const std::string queueName) {
 
     currTransact = *_CECIt;
     _queues.depart(queueName, currTransact);
+    (currTransact)->setNextState((currTransact)->getCurrentState()+1);
+}
+
+void SimCPP::test(const bool switchRoute, const unsigned int ifFalseState) {
+    Transact* currTransact = *_CECIt;
+    std::string message;
+    
+    if (switchRoute)
+        currTransact->setNextState(currTransact->getCurrentState()+1);
+    else
+        currTransact->setNextState(ifFalseState);
+
+    if (_simLogs->isEnable_CFECLog()) {
+        message = "\"test\" Xact:" + std::to_string(currTransact->getID()) + " model time: " + std::to_string(_modelTime) \
+                                     + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
+        _simLogs->logMess_CFECLog(message);
+    }
+
+    if (_simLogs->isEnable_transactLog()) {
+        message = "Xact:" + std::to_string(currTransact->getID()) + " at state: " + std::to_string(currTransact->getCurrentState()) + "; model time: " \
+                                + std::to_string(_modelTime) + ": tested and will transfered to state:" + std::to_string(currTransact->getNextState());                 
+        _simLogs->logMess_transactLog(message);
+    }
+}
+
+void SimCPP::assign(const std::string paramName, const long double value) {
+    Transact* currTransact = *_CECIt;
+    std::string message;
+
+    currTransact->setParam(paramName, value);
+    currTransact->setNextState(currTransact->getCurrentState()+1);
+
+    if (_simLogs->isEnable_CFECLog()) {
+        message = "\"assign parameter\" Xact:" + std::to_string(currTransact->getID()) + " model time: " + std::to_string(_modelTime) \
+                                     + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
+        _simLogs->logMess_CFECLog(message);
+    }
+
+    if (_simLogs->isEnable_transactLog()) {
+        message = "Xact:" + std::to_string(currTransact->getID()) + " at state: " + std::to_string(currTransact->getCurrentState()) + "; model time: " \
+                                + std::to_string(_modelTime) + ": assign parameter: \"" + paramName + "\" with value:" + std::to_string(value);                 
+        _simLogs->logMess_transactLog(message);
+    }
+}
+
+void SimCPP::transfer(const unsigned int nextState) {
+    std::string message;
+    Transact* currTransact = *_CECIt;
+    currTransact->setNextState(nextState);
+
+    if (_simLogs->isEnable_CFECLog()) {
+        message = "\"transfer\" Xact:" + std::to_string(currTransact->getID()) + " model time: " + std::to_string(_modelTime) \
+                                     + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
+        _simLogs->logMess_CFECLog(message);
+    }
+
+    if (_simLogs->isEnable_transactLog()) {
+        message = "Xact:" + std::to_string(currTransact->getID()) + " at state: " + std::to_string(currTransact->getCurrentState()) + "; model time: " \
+                                + std::to_string(_modelTime) + ": transfered to pos:" + std::to_string(nextState);                 
+        _simLogs->logMess_transactLog(message);
+    }
 }
 
 void SimCPP::advance(long double delay) {
@@ -162,15 +169,15 @@ void SimCPP::advance(long double delay) {
 
     currTransact = *_CECIt;
     _CECIt++;
- 
+
+    currTransact->setNextState(currTransact->getCurrentState()+1); 
     currTransact->setTime(_modelTime + delay);
     _CEC.eraseTrans(currTransact);
-
     _FEC.emplace(std::find_if(_FEC.begin(),_FEC.end(),[ currTransact ](Transact* transact) {return currTransact->getTime() < transact->getTime();}), currTransact);
 
     if (_simLogs->isEnable_CFECLog()) {
                 message = "\"advance\" Xact:" + std::to_string(currTransact->getID()) + " model time: " + std::to_string(_modelTime) \
-                                     + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n'; 
+                                     + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
                 _simLogs->logMess_CFECLog(message);
         }
 
@@ -189,6 +196,8 @@ void SimCPP::generate(long double birthDelayInterval) {
         throw std::logic_error("You cannot interact with the model until you initialize it with \"start\"");
     }
 
+    (currTransact)->setNextState((currTransact)->getCurrentState()+1); 
+
     Transact* newTransact = new Transact(_maxId++,_modelTime + birthDelayInterval, 0, currTransact->getCurrentState());
     _FEC.emplace(std::find_if(_FEC.begin(),_FEC.end(),[ newTransact ](Transact* transact) {return newTransact->getTime() < transact->getTime();}), newTransact);
 
@@ -201,7 +210,7 @@ void SimCPP::generate(long double birthDelayInterval) {
     }
     if (_simLogs->isEnable_CFECLog()) {
         message = "\"generation\" Xact:" + std::to_string(newTransact->getID()) + " model time: " + std::to_string(_modelTime) \
-                                 + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n'; 
+                                 + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
         _simLogs->logMess_CFECLog(message);
     }
 };
@@ -225,7 +234,7 @@ void SimCPP::initGenerate(unsigned int birthState, long double birthTime) {
     
     if (_simLogs->isEnable_CFECLog()) {
         message = "\"init generation\" Xact:" + std::to_string(newTransact->getID()) + " model time: " + std::to_string(_modelTime) \
-                                     + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n'; 
+                                     + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
         _simLogs->logMess_CFECLog(message);
     }
 };
@@ -233,6 +242,8 @@ void SimCPP::initGenerate(unsigned int birthState, long double birthTime) {
 unsigned int SimCPP::sysEvent() {
     std::string message;
     Transact* replTransact;
+    //if we cant move trans we skip it
+    _CECIt = _CEC.skipBlocked(_CECIt);
 
     //moving transactions from FEC to CEC if _CECIt at end
     while (_CECIt == _CEC.end()) {
@@ -244,10 +255,11 @@ unsigned int SimCPP::sysEvent() {
         
         _FEC.erase(_FEC.begin());
         _CECIt = _CEC.begin();
+        _CECIt = _CEC.skipBlocked(_CECIt);
 
         if (_simLogs->isEnable_CFECLog()) {
             message = "\"promotion of model time\" Xact:" + std::to_string(replTransact->getID()) + " model time: " + std::to_string(_modelTime)\
-                             + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n'; 
+                             + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
             _simLogs->logMess_CFECLog(message);
         }
     }
@@ -291,7 +303,7 @@ void SimCPP::terminate(unsigned int reduceCounter) {
 
         if (_simLogs->isEnable_CFECLog()) {
             message = "\"terminating\" Xact:" + std::to_string(termTransID) + " model time: " + std::to_string(_modelTime) \
-                        + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n'; 
+                        + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
             _simLogs->logMess_CFECLog(message);
         }
 
@@ -322,7 +334,7 @@ void SimCPP::start(unsigned int count, std::ofstream* sysEvLog, std::ofstream* s
     this->_maxId = 1;
 }
 
-unsigned int SimCPP::enter(const std::string storageName, const unsigned int numbOfChannels) {
+void SimCPP::enter(const std::string storageName, const unsigned int numbOfChannels) {
     unsigned int seizedChannels;
     Transact* currTransact;
     std::string message;
@@ -333,10 +345,13 @@ unsigned int SimCPP::enter(const std::string storageName, const unsigned int num
 
     currTransact = *_CECIt;
     seizedChannels = _storages.enter(currTransact, storageName, numbOfChannels);
+    if (numbOfChannels == seizedChannels) {
+        (currTransact)->setNextState((currTransact)->getCurrentState()+1); 
+    }
 
     if (_simLogs->isEnable_CFECLog()) {
         message = "\"seizing\" Xact:" + std::to_string((currTransact)->getID()) + " model time: " + std::to_string(_modelTime) \
-                   + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n'; 
+                   + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
                 _simLogs->logMess_CFECLog(message);
     }
 
@@ -345,9 +360,8 @@ unsigned int SimCPP::enter(const std::string storageName, const unsigned int num
                                 + std::to_string(_modelTime) + ": seized " + std::to_string(seizedChannels) + " channel(s) at \"" + storageName + "\" storage";                 
         _simLogs->logMess_transactLog(message);
     }
-
-    return seizedChannels;
 }
+
 
 void SimCPP::leave(const std::string storageName, const unsigned int numbOfChannels) {
     unsigned int releasedChannels;
@@ -359,13 +373,15 @@ void SimCPP::leave(const std::string storageName, const unsigned int numbOfChann
     }
 
     currTransact = *_CECIt;
+    (currTransact)->setNextState((currTransact)->getCurrentState()+1);
 
     releasedChannels = _storages.leave(currTransact, storageName, numbOfChannels);
     _CEC.setReset(true); //will used while TERMINATE transact
+     
 
     if (_simLogs->isEnable_CFECLog()) {
         message = "\"releazing\" Xact:" + std::to_string((currTransact)->getID()) + " model time: " + std::to_string(_modelTime) \
-                   + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n'; 
+                   + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
                 _simLogs->logMess_CFECLog(message);
     }
 
@@ -376,11 +392,83 @@ void SimCPP::leave(const std::string storageName, const unsigned int numbOfChann
     }
 }
 
+
+void SimCPP::link(const std::string linkName, const std::string discipline) {
+    std::string message;
+    Transact* currTransact;
+
+    if (!this->isRunning()) {
+        throw std::logic_error("You cannot interact with the model until you initialize it with \"start\"");
+    }
+
+    currTransact = *_CECIt;
+    currTransact->setNextState(currTransact->getCurrentState());
+
+    _links.link(currTransact,linkName,discipline);
+    _CEC.erase(_CECIt++);
+
+    if (_simLogs->isEnable_CFECLog()) {
+        message = "\"linking\" Xact:" + std::to_string((currTransact)->getID()) + " to \"" + linkName + "\" model time: " + std::to_string(_modelTime) \
+                   + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
+        _simLogs->logMess_CFECLog(message);
+    }
+
+    if (_simLogs->isEnable_transactLog()) {
+        message = "Xact:" + std::to_string((currTransact)->getID()) + " at state: " + std::to_string((currTransact)->getCurrentState()) + "; model time: " \
+                                + std::to_string(_modelTime) + ": linking to \"" + linkName + "\" with \"" + discipline + "\" discipline";                 
+        _simLogs->logMess_transactLog(message);
+    }
+}
+
+void SimCPP::unlink(const std::string linkName, const unsigned int nextState, const unsigned int numbReleasedTrans) {
+    std::string message;
+    std::string transIDString;
+    std::vector<Transact*> releasedTrans;
+    std::list<Transact*>::iterator emplaceIt = _CECIt;
+    Transact* currTransact;
+
+    if (!this->isRunning()) {
+        throw std::logic_error("You cannot interact with the model until you initialize it with \"start\"");
+    }
+
+    currTransact = *_CECIt;
+    currTransact->setNextState(currTransact->getCurrentState()+1);
+
+    releasedTrans = _links.unlink(linkName,numbReleasedTrans);
+
+    //emplasing to _CEC each transact after currTransact, setting current model time and setting unlink state 
+    std::for_each(releasedTrans.begin(), releasedTrans.end(), [ this,nextState,&emplaceIt ] (Transact* emplTransact) \
+        { emplTransact->setTime(this->getModelTime()); emplTransact->setNextState(nextState); emplaceIt++;
+            emplaceIt = (this->_CEC.emplace(emplaceIt, emplTransact));});
+
+    //making transact ID string
+    std::for_each(releasedTrans.begin(),releasedTrans.end(),[ &transIDString ](Transact* transact){ transIDString += std::to_string(transact->getID()) + ';';});   
+
+    if (_simLogs->isEnable_CFECLog()) {
+        message = "\"unlinking\" Xact:" + transIDString + " from \"" + linkName + "\" to state:" + std::to_string(nextState) + " model time: " + std::to_string(_modelTime) \
+                   + '\n' + _FEC.getAsString() + '\n' + _CEC.getAsString() + '\n' + _links.getAsString() + '\n'; 
+        _simLogs->logMess_CFECLog(message);
+    }
+
+    if (_simLogs->isEnable_transactLog()) {
+        message = "Xact:" + transIDString + " at state: " + std::to_string((currTransact)->getCurrentState()) + "; model time: " \
+                                + std::to_string(_modelTime) + ": unlinking from \"" + linkName;                 
+        _simLogs->logMess_transactLog(message);
+    }
+}
+
 void SimCPP::storage(const std::string storageName, const unsigned int _maxChannels) {
     if (this->isRunning()) {
         throw std::logic_error("You cannot interact with the model storages after \"start\"ing the model");
     }
     _storages.storageAppend(storageName, _maxChannels);
+}
+
+unsigned int SimCPP::getStorageParam(const std::string storageName, const std::string SNA) {
+    if (!this->isRunning()) {
+        throw std::logic_error("You cannot interact with the model until you initialize it with \"start\"");
+    }
+    return _storages.getStorageParam(storageName, SNA);
 }
 
 double SimCPP::exponential(double mean) {

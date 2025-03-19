@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Transact.h"
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Transact.h>
 #include <algorithm>
 #include <string>
 #include <list>
@@ -35,6 +35,7 @@ class EventChain {
         void erase(EventChain::iterator evChainIt) { _evChain.erase(evChainIt); }
 
         //void clear();
+        EventChain::iterator skipBlocked(EventChain::iterator evChainIt); //if we cant move trans we skip it
         const std::string getAsString();
 };
 
@@ -48,4 +49,11 @@ const std::string EventChain::getAsString() {
         evIt++;
     }
     return evS;
+}
+
+EventChain::iterator EventChain::skipBlocked(EventChain::iterator evChainIt) {
+    while((evChainIt != this->end()) && (*evChainIt)->isBlocked()) {
+        evChainIt++;
+    }
+    return evChainIt;
 }

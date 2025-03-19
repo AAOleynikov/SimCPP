@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Transact.h"
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Transact.h>
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
@@ -25,6 +25,7 @@ class Storages {
 
 class Storages::Storage {
     private:
+        std::vector<Transact*> _blockList;
         const unsigned int _maxChannels;
         unsigned int _currChannels; //count of seized! channels
         const std::string _storageName;
@@ -127,6 +128,8 @@ unsigned int Storages::Storage::enter(Transact* transact, const unsigned int num
         throw std::logic_error("Storage request exceeds total capacity (" + _storageName + ')');
 
     if (numbOfChannels > (_maxChannels - _currChannels)) {
+        transact->block();
+        _blockList.emplace_back(transact);
         return 0;
     }
     else {
@@ -142,6 +145,8 @@ unsigned int Storages::Storage::leave(Transact* transact, const unsigned int num
     }
 
     _currChannels -= numbOfChannels;
+    std::for_each(_blockList.begin(), _blockList.end(), [](Transact* transactUnbl){ transactUnbl->unBlock(); });
+    _blockList.clear();
 
     this->leaveStat(numbOfChannels, transact->getTime());
     return numbOfChannels;

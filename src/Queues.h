@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Transact.h"
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Transact.h>
 #include <string>
 #include <algorithm>
 #include <stdexcept>
@@ -18,7 +18,6 @@ class Queues {
         Queues(){}
         std::vector<Queue*>::iterator chooseQueue(const std::string queueName);
     public:
-        unsigned int getQueueParam(const std::string queueName, const std::string SNA);
         void queue(const std::string queueName, Transact* transact);
         void depart(const std::string queueName, Transact* transact);
         std::string getFinalStatString(long double endModelTime);
@@ -43,7 +42,6 @@ class Queues::Queue {
             _maxQueueLength(0), _currQueueLength(0), _cumSumCont(0), _prevQueueTime(0) {}
 
         std::string getName() { return _queueName; }
-        unsigned int getQueueParam(const std::string SNA);
         void queue(Transact* transact);
         void depart(Transact* transact);
         std::string getFinalStatString(long double endModelTime);
@@ -51,10 +49,6 @@ class Queues::Queue {
 };
 
 //-----
-
-unsigned int Queues::getQueueParam(const std::string queueName, const std::string SNA) {
-    return (*chooseQueue(queueName))->getQueueParam(SNA);
-}
 
 std::string Queues::getFinalStatString(long double endModelTime) {
     std::string message = '\n' + Queue::getFinalStatMeaningString();
@@ -87,15 +81,6 @@ void Queues::depart(const std::string queueName, Transact* transact) {
 }
 
 //-----
-
-unsigned int Queues::Queue::getQueueParam(const std::string SNA) {
-    if (SNA == "Q") {
-        return _currQueueLength;
-    }
-    else {
-        throw std::logic_error("Unknown system numeric attribute \"" + SNA + '\"');
-    }
-}
 
 void Queues::Queue::queue(Transact* transact) {
     _queue.push_back({transact,transact->getTime()});

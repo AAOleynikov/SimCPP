@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Transact.h"
+#include <C:\Users\666an\Documents\BMSTU\3SEM\Pract_C++\Practica_3\SimCPP\Transact.h>
 #include <iostream>
 #include <fstream>
 #include <string>
